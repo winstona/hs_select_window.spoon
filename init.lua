@@ -16,7 +16,7 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 -- things to configure
 
 obj.rowsToDisplay = 14 -- how many rows to display in the chooser
-
+obj.windowChoiceCount = 0
 
 -- for debugging purposes
 function obj:print_table(t, f)
@@ -183,6 +183,7 @@ function obj:selectWindow(onlyCurrentApp)
       return
    end
    windowChooser:choices(windowChoices)
+   obj.windowChoiceCount = #windowChoices
    --windowChooser:placeholderText('')
    windowChooser:rows(obj.rowsToDisplay)         
    windowChooser:query(nil)         
@@ -201,6 +202,36 @@ function obj:bindHotkeys(mapping)
    hs.spoons.bindHotkeysToSpec(def, mapping)
 end
 
+function obj:next(allWindows)
+   if not windowChooser:isVisible() then
+      self:selectWindow(allWindows)
+   else
+      local nextRowId = ((windowChooser:selectedRow()-1+1) % (obj.windowChoiceCount-1))+1
+      -- hs.alert.show("currently selected: " .. nextRowId .. "/" .. obj.windowChoiceCount)
+      windowChooser:selectedRow(nextRowId)
+   end
+   self.inWindowSwitcherMode = true
+end
+
+function obj:previous(allWindows)
+   if not windowChooser:isVisible() then
+      self:selectWindow(allWindows)
+   else
+      local nextRowId = ((windowChooser:selectedRow()-1-1) % (obj.windowChoiceCount-1))+1
+      -- hs.alert.show("currently selected: " .. nextRowId .. "/" .. obj.windowChoiceCount)
+      windowChooser:selectedRow(nextRowId)
+   end
+   self.inWindowSwitcherMode = true
+end
+
+
+function obj:select()
+   if windowChooser:isVisible() and self.inWindowSwitcherMode then
+      -- hs.alert.show("selecting row...")
+      windowChooser:select()
+      self.inWindowSwitcherMode = false
+   end
+end
 
 
 return obj
